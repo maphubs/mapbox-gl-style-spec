@@ -255,6 +255,7 @@
         "symbol",
         "circle",
         "raster",
+        "arcgisraster",
         "background"
       ],
       "doc": "Rendering type of this layer."
@@ -315,6 +316,7 @@
     "layout_circle",
     "layout_symbol",
     "layout_raster",
+    "layout_arcgisraster",
     "layout_background"
   ],
   "layout_background": {
@@ -772,6 +774,18 @@
     }
   },
   "layout_raster": {
+    "visibility": {
+      "type": "enum",
+      "function": "piecewise-constant",
+      "values": [
+        "visible",
+        "none"
+      ],
+      "default": "visible",
+      "doc": "The display of this layer. `none` hides this layer."
+    }
+  },
+  "layout_arcgisraster": {
     "visibility": {
       "type": "enum",
       "function": "piecewise-constant",
