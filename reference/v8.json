@@ -108,7 +108,8 @@
       "type": "enum",
       "values": [
         "vector",
-        "raster"
+        "raster",
+        "arcgisraster"
       ],
       "doc": "The data type of the tile source."
     },
@@ -855,6 +856,7 @@
     "paint_circle",
     "paint_symbol",
     "paint_raster",
+    "paint_arcgisraster",
     "paint_background"
   ],
   "paint_fill": {
@@ -1268,6 +1270,71 @@
     }
   },
   "paint_raster": {
+    "raster-opacity": {
+      "type": "number",
+      "doc": "The opacity at which the image will be drawn.",
+      "default": 1,
+      "minimum": 0,
+      "maximum": 1,
+      "function": "interpolated",
+      "transition": true
+    },
+    "raster-hue-rotate": {
+      "type": "number",
+      "default": 0,
+      "period": 360,
+      "function": "interpolated",
+      "transition": true,
+      "units": "degrees",
+      "doc": "Rotates hues around the color wheel."
+    },
+    "raster-brightness-min": {
+      "type": "number",
+      "function": "interpolated",
+      "doc": "Increase or reduce the brightness of the image. The value is the minimum brightness.",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 1,
+      "transition": true
+    },
+    "raster-brightness-max": {
+      "type": "number",
+      "function": "interpolated",
+      "doc": "Increase or reduce the brightness of the image. The value is the maximum brightness.",
+      "default": 1,
+      "minimum": 0,
+      "maximum": 1,
+      "transition": true
+    },
+    "raster-saturation": {
+      "type": "number",
+      "doc": "Increase or reduce the saturation of the image.",
+      "default": 0,
+      "minimum": -1,
+      "maximum": 1,
+      "function": "interpolated",
+      "transition": true
+    },
+    "raster-contrast": {
+      "type": "number",
+      "doc": "Increase or reduce the contrast of the image.",
+      "default": 0,
+      "minimum": -1,
+      "maximum": 1,
+      "function": "interpolated",
+      "transition": true
+    },
+    "raster-fade-duration": {
+      "type": "number",
+      "default": 300,
+      "minimum": 0,
+      "function": "interpolated",
+      "transition": true,
+      "units": "milliseconds",
+      "doc": "Fade duration when a new tile is added."
+    }
+  },
+  "paint_arcgisraster": {
     "raster-opacity": {
       "type": "number",
       "doc": "The opacity at which the image will be drawn.",
