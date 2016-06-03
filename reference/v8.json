@@ -56,12 +56,12 @@
     },
     "sprite": {
       "type": "string",
-      "doc": "A base URL for retrieving the sprite image and metadata. The extensions `.png`, `.json` and scale factor `@2x.png` will be automatically appended.",
+      "doc": "A base URL for retrieving the sprite image and metadata. The extensions `.png`, `.json` and scale factor `@2x.png` will be automatically appended. This property is required if any layer uses the 'sprite-image' layout property.",
       "example": "mapbox://sprites/mapbox/bright-v8"
     },
     "glyphs": {
       "type": "string",
-      "doc": "A URL template for loading signed-distance-field glyph sets in PBF format. Valid tokens are {fontstack} and {range}.",
+      "doc": "A URL template for loading signed-distance-field glyph sets in PBF format. The URL must include `{fontstack}` and `{range}` tokens. This property is required if any layer uses the 'text-field' layout property.",
       "example": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
     },
     "transition": {
@@ -815,7 +815,9 @@
       "!in",
       "all",
       "any",
-      "none"
+      "none",
+      "has",
+      "!has"
     ],
     "doc": "The filter operator."
   },
@@ -851,6 +853,21 @@
       "default": 1,
       "minimum": 0,
       "doc": "The exponential base of the interpolation curve. It controls the rate at which the result increases. Higher values make the result increase more towards the high end of the range. With `1` the stops are interpolated linearly."
+    },
+    "property": {
+      "type": "string",
+      "doc": "The name of a global property or feature property to use as the function input.",
+      "default": "$zoom"
+    },
+    "type": {
+      "type": "enum",
+      "values": [
+          "exponential",
+          "interval",
+          "categorical"
+      ],
+      "doc": "The interpolation strategy to use in function evaluation.",
+      "default": "exponential"
     }
   },
   "function_stop": {

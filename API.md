@@ -85,89 +85,55 @@ fs.writeFileSync('./style.json', JSON.stringify(migrate(style)));
 **Returns** `Object`, a migrated style
 
 
-### `validate(str)`
+### `validate(style, [styleSpec])`
 
-Validate a Mapbox GL Style given as a string of JSON. Returns an array
-that can contain any number of objects representing errors. Each
-object has members `line` (number) and `message` (string).
-
-This expects the style to be given as a string, rather than an object,
-so that it can return accurate line numbers for errors.
-if you happen to have a JSON object already, use validate.parsed() instead.
+Validate a Mapbox GL style against the style specification.
 
 
 ### Parameters
 
-| parameter | type   | description                   |
-| --------- | ------ | ----------------------------- |
-| `str`     | string | a Mapbox GL Style as a string |
+| parameter     | type                   | description                                                                                                                |
+| ------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `style`       | Object\,String\,Buffer | The style to be validated. If a `String`     or `Buffer` is provided, the returned errors will contain line numbers.       |
+| `[styleSpec]` | Object                 | _optional:_ The style specification to validate against.     If omitted, the spec version is inferred from the stylesheet. |
 
 
 ### Example
 
 ```js
-var fs = require('fs');
-var validate = require('mapbox-gl-style-spec').validate;
-var style = fs.readFileSync('./style.json', 'utf8');
-var errors = validate(style);
+  var validate = require('mapbox-gl-style-spec').validate;
+  var style = fs.readFileSync('./style.json', 'utf8');
+  var errors = validate(style);
 ```
 
 
-**Returns** `Array.<Object>`, an array of errors
+**Returns** `Array.<ValidationError|ParsingError>`, 
 
 
-### `validate.parsed(style)`
+### `validateStyleMin(style, [styleSpec])`
 
-Validate a Mapbox GL Style as a JSON object against the given
-style `reference`. Returns results in the same format as
-`validate`.
+Validate a Mapbox GL style against the style specification. This entrypoint,
+`mapbox-gl-style-spec/lib/validate_style.min`, is designed to produce as
+small a browserify bundle as possible by omitting unnecessary functionality
+and legacy style specifications.
 
 
 ### Parameters
 
-| parameter | type   | description       |
-| --------- | ------ | ----------------- |
-| `style`   | Object | a Mapbox GL Style |
+| parameter     | type   | description                                                                                             |
+| ------------- | ------ | ------------------------------------------------------------------------------------------------------- |
+| `style`       | Object | The style to be validated.                                                                              |
+| `[styleSpec]` | Object | _optional:_ The style specification to validate against.     If omitted, the latest style spec is used. |
 
 
 ### Example
 
 ```js
-var fs = require('fs');
-var validate = require('mapbox-gl-style-spec').validate;
-var spec = require('mapbox-gl-style-spec');
-var style = require('./style.json');
-var errors = validate.parsed(style, spec.v7);
+  var validate = require('mapbox-gl-style-spec/lib/validate_style.min');
+  var errors = validate(style);
 ```
 
 
-**Returns** `Array.<Object>`, an array of errors
-
-
-### `validate.latest(style)`
-
-Validate a Mapbox GL Style given a JSON object against the latest
-version of the style spec. Returns results in the same format as
-`validate`.
-
-
-### Parameters
-
-| parameter | type   | description       |
-| --------- | ------ | ----------------- |
-| `style`   | Object | a Mapbox GL Style |
-
-
-### Example
-
-```js
-var fs = require('fs');
-var validate = require('mapbox-gl-style-spec').validate;
-var style = require('./style.json');
-var errors = validate.latest(style);
-```
-
-
-**Returns** `Array.<Object>`, an array of errors
+**Returns** `Array.<ValidationError>`, 
 
 
