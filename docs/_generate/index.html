@@ -1,7 +1,7 @@
 ---
 layout: default
 category: reference
-title: Mapbox GL Style Reference
+title: Mapbox Style Specification
 permalink: /
 class: fill-light
 options: full
@@ -15,11 +15,18 @@ navigation:
     - title: zoom
     - title: bearing
     - title: pitch
+    - title: light
     - title: sources
     - title: sprite
     - title: glyphs
     - title: transition
     - title: layers
+  - title: Light
+    subnav:
+    - title: anchor
+    - title: position
+    - title: color
+    - title: intensity
   - title: Sources
     subnav:
     - title: Vector
@@ -59,11 +66,6 @@ navigation:
 <div class='docnav hide-mobile'>
   <div class='limiter'><div class='col3 contain'>
     <nav class='scroll-styled quiet-scroll small'>
-
-      <div class='space-bottom1'>
-        <a class='block truncate strong' href='#'>Style Reference <span class='quiet'>v<%= ref.$version %></span></a>
-      </div>
-
       {% for navitem in page.navigation %}
       <div class='space-bottom1'>
         {% assign navitem_id = navitem.title | downcase | slugify %}
@@ -88,30 +90,30 @@ navigation:
       </div>
       <div class='col9 dark tabs mobile-cols pad1'><!--
         --><a href='https://mapbox.com/mapbox-gl-js/api' class='col3 truncate'>API</a><!--
-        --><a href='#' class='col3 truncate active'>Style Reference</a><!--
+        --><a href='#' class='col3 truncate active'>Style Specification</a><!--
         --><a href='https://mapbox.com/mapbox-gl-js/examples' class='col3 truncate'>Examples</a><!--
         --><a href='https://mapbox.com/mapbox-gl-js/plugins' class='col3 truncate'>Plugins</a>
       </div>
     </nav>
   </div>
 
-  <div class='contain margin3 col9'>
-    <div class='pad2 prose'>
+  <div class='contain margin3 col9 pad2'>
+    <div class='prose'>
       <h1>{{ page.title }}</h1>
-
-      <p>The Mapbox GL style is an object that defines what data to draw, the order to draw it in, and how to style the data when drawing it. The <a href='http://json.org'>JSON</a> structure follows the renderer implementation very closely. It provides the basic building blocks out of which more complex styles can be built.</p>
-
-      <p class='space-bottom4 quiet small'>Key:
-        <a class='icon smooth-ramp quiet micro space-right inline' href='#function' title='Supports interpolated functions'>supports interpolated functions</a>
-        <a class='icon step-ramp quiet micro space-right inline' href='#function' title='Supports piecewise constant functions'>supports piecewise constant functions</a>
-        <span class='icon opacity quiet micro space-right inline' title='Transitionable'>transitionable</span>
+      <p>A Mapbox style is a document that defines the visual appearance of a map: what data to draw, the order to draw it in, and how to style the data when drawing it. A style document is a <a href="http://www.json.org/">JSON</a> object with specific root level and nested properties. This specification defines and describes these properties.</p>
+      <p>The intended audience of this specification includes:
+      <ul>
+      <li>Advanced designers and cartographers who want to write styles by hand rather than use <a href='https://www.mapbox.com/studio'>Mapbox Studio</a></li>
+      <li>Developers using style-related features of <a href='https://www.mapbox.com/mapbox-gl-js/'>Mapbox GL JS</a> or the Mapbox <a href='https://www.mapbox.com/ios-sdk/'>iOS</a> or <a href='https://www.mapbox.com/android-sdk/'>Android</a> SDKs</li>
+      <li>Authors of software that generates or processes Mapbox styles.</li>
+      </ul>
       </p>
     </div>
 
-    <div class='pad2 prose'>
+    <div class='prose'>
       <a id='root' class='anchor'></a>
       <h2><a href='#root' title='link to root'>Root Properties</a></h2>
-      <p>Top level properties on the Mapbox GL style object specify the map's appearance, sources, and layers.</p>
+      <p>Root level properties of a Mapbox style specify the map's layers, tile sources and other resources, and default values for the initial camera position when not specified elsewhere.</p>
       <div class='space-bottom1 clearfix'>
 {% highlight json%}
 {
@@ -132,6 +134,27 @@ navigation:
     </div>
 
 
+    <div class='pad2 prose'>
+      <a id='light' class='anchor'></a>
+      <h2><a href='#light' title='link to light'>Light</a></h2>
+      <p>
+        A style's <code>light</code> property provides global light source for that style.
+        <% if (ref.$root.light.example) { %>
+        <div class='space-bottom1 pad2x clearfix'>
+{% highlight json %}
+<%= '"light": ' + JSON.stringify(ref.$root.light.example, null, 2) %>
+{% endhighlight %}
+        </div>
+        <% } %>
+      </p>
+      <div class='pad2 keyline-all fill-white'>
+        <% _(ref.light).each(function(prop, name) { %>
+        <%= item({prop: prop, id: "light-" + name, name: name}) %>
+        <% }); %>
+      </div>
+    </div>
+
+
     <% var source_types = ['vector', 'raster', 'geojson', 'image', 'video']; %>
 
     <div class='pad2 prose'>
@@ -139,9 +162,17 @@ navigation:
       <h2><a href='#sources' title='link to sources'>Sources</a></h2>
       <p>
         Sources supply data to be shown on the map. The type of source is specified by the <code>"type"</code> property,
-        and must be one of <var><%= source_types.join(', ') %></var>. Tiled sources (vector and raster) must specify
+        and must be one of <var><%= source_types.join('</var>, <var>') %></var>. Adding a source
+        won't immediately make data appear on the map because sources don't contain
+        styling details like color or width. Layers refer
+        to a source and give it a visual representation. This makes it possible
+        to style the same source in different ways, like differentiating between
+        types of roads in a highways layer.
+      </p>
+      <p>
+        Tiled sources (vector and raster) must specify
         their details in terms of the <a href="https://github.com/mapbox/tilejson-spec">TileJSON specification</a>.
-        This can be done in two ways:
+        This can be done in several ways:
       </p>
       <ul>
         <li>
@@ -171,6 +202,23 @@ navigation:
 {% endhighlight %}
           </div>
         </li>
+        <li>
+          By providing a url to a WMS server that supports
+          EPSG:3857 (or EPSG:900913) as a source of tiled data.
+          The server url should contain a <code>"{bbox-epsg-3857}"</code>
+          replacement token to supply the <code>bbox</code> parameter.
+          <em>(This feature is currently supported only in Mapbox GL JS and Mapbox macOS SDK.)</em>
+{% highlight json%}
+"wms-imagery": {
+  "type": "raster",
+  "tiles": [
+  'http://a.example.com/wms?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=example'
+  ],
+  "tileSize": 256
+}
+{% endhighlight %}
+        </li>
+
       </ul>
 
       <div class='space-bottom4 fill-white keyline-all'>
@@ -178,7 +226,7 @@ navigation:
           <h3 class='space-bottom1'><a href='#sources-vector' title='link to vector'>vector</a></h3>
           <p>
             A vector tile source. Tiles must be in <a href="https://www.mapbox.com/developers/vector-tiles/">Mapbox
-            Vector Tile format</a>. All layers that use a vector source must specify a <code>"source-layer"</code> value.
+            Vector Tile format</a>. All geometric coordinates in vector tiles must be between <code>-1 * extent</code> and <code>(extent * 2) - 1</code> inclusive. All layers that use a vector source must specify a <code>"source-layer"</code> value.
             For vector tiles hosted by Mapbox, the <code>"url"</code> value should be of the
             form <code>mapbox://<var>mapid</var></code>.
           </p>
@@ -190,6 +238,34 @@ navigation:
 }
 {% endhighlight %}
           </div>
+          <div class='space-bottom1 clearfix'>
+            <% _(ref.source_tile).each(function(prop, name) { %>
+              <%
+                // note that we omit 'tileSize' here, since VECTOR and raster
+                // both use source_tile, but tileSize is prohibited for vector sources
+              %>
+              <%  if (name === '*' || name === 'type' || name === 'tileSize') return %>
+              <%= item({prop: prop, id: "sources-vector-" + name, name: name}) %>
+            <% }); %>
+          </div>
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 2.0.1</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
         <div id='sources-raster' class='pad2 keyline-bottom'>
           <h3 class='space-bottom1'><a href='#sources-raster' title='link to raster'>raster</a></h3>
@@ -206,6 +282,30 @@ navigation:
 }
 {% endhighlight %}
           </div>
+          <div class='space-bottom1 clearfix'>
+            <% _(ref.source_tile).each(function(prop, name) { %>
+              <%  if (name === '*' || name === 'type') return %>
+              <%= item({prop: prop, id: "sources-raster-" + name, name: name}) %>
+            <% }); %>
+          </div>
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 2.0.1</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
         <div id='sources-geojson' class='pad2 keyline-bottom'>
           <h3 class='space-bottom1'><a href='#sources-geojson' title='link to geojson'>geojson</a></h3>
@@ -231,6 +331,48 @@ navigation:
 }
 {% endhighlight %}
           </div>
+        <p>
+          This example of a GeoJSON source refers to an external GeoJSON document via its URL. The
+          GeoJSON document must be on the same domain or accessible using
+          <a href='http://enable-cors.org/'>CORS</a>.
+        </p>
+  <div class='space-bottom1 clearfix'>
+{% highlight json%}
+"geojson-lines": {
+  "type": "geojson",
+  "data": "./lines.geojson"
+}
+{% endhighlight %}
+          </div>
+          <div class='space-bottom1 clearfix'>
+            <% _(ref.source_geojson).each(function(prop, name) { %>
+              <%  if (name === '*' || name === 'type') return %>
+              <%= item({prop: prop, id: "sources-geojson-" + name, name: name}) %>
+            <% }); %>
+          </div>
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Requirements</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 2.0.1</td></tr>
+            <tr>
+              <td>clustering</td>
+              <td class='center'>&gt;= 0.14.0</td>
+              <td class='center'>Not yet supported</td>
+              <td class='center'>Not yet supported</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
         <div id='sources-image' class='pad2 keyline-bottom'>
           <h3 class='space-bottom1'><a href='#sources-image' title='link to image'>image</a></h3>
@@ -255,6 +397,30 @@ navigation:
 }
 {% endhighlight %}
           </div>
+          <div class='space-bottom1 clearfix'>
+            <% _(ref.source_image).each(function(prop, name) { %>
+              <%  if (name === '*' || name === 'type') return %>
+              <%= item({prop: prop, id: "sources-image-" + name, name: name}) %>
+            <% }); %>
+          </div>
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'><a href="https://github.com/mapbox/mapbox-gl-native/issues/1350">Not yet supported</a></td>
+              <td class='center'><a href="https://github.com/mapbox/mapbox-gl-native/issues/1350">Not yet supported</a></td>
+            </tr>
+            </tbody>
+          </table>
         </div>
         <div id='sources-video' class='pad2 keyline-bottom'>
           <h3 class='space-bottom1'><a href='#sources-video' title='link to video'>video</a></h3>
@@ -284,6 +450,30 @@ navigation:
 }
 {% endhighlight %}
           </div>
+          <div class='space-bottom1 clearfix'>
+            <% _(ref.source_video).each(function(prop, name) { %>
+              <%  if (name === '*' || name === 'type') return %>
+              <%= item({prop: prop, id: "sources-video-" + name, name: name}) %>
+            <% }); %>
+          </div>
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td>&gt;= 0.10.0</td>
+              <td><a href="https://github.com/mapbox/mapbox-gl-native/issues/601">Not yet supported</a></td>
+              <td><a href="https://github.com/mapbox/mapbox-gl-native/issues/601">Not yet supported</a></td>
+            </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -338,7 +528,7 @@ navigation:
         </li>
       </ul>
       <p>
-        Mapbox GL renderers will use the value of the <code>sprite</code> property in the style to generate the URLs for
+        Mapbox SDKs will use the value of the <code>sprite</code> property in the style to generate the URLs for
         loading both files. First, for both file types, it will append <code>@2x</code> to the URL on high-DPI devices.
         Second, it will append a file extension: <code>.json</code> for the index file, and <code>.png</code> for the
         image file. For example, if you specified <code>"sprite": "https://example.com/sprite"</code>, renderers would
@@ -400,6 +590,13 @@ navigation:
       <p>
         A style's <code>layers</code> property lists all of the layers available in that style. The type of
         layer is specified by the <code>"type"</code> property, and must be one of <var><%= layer_types.join(', ') %></var>.
+      </p>
+      <p>
+        Except for layers of the <var>background</var> type, each layer needs
+        to refer to a source. Layers take the data that they get from a source,
+        optionally filter features, and then define how those features are
+        styled.
+      </p>
         <% if (ref.$root.layers.example) { %>
         <div class='space-bottom1 pad2x clearfix'>
 {% highlight json %}
@@ -434,6 +631,11 @@ navigation:
         name set. For example, a layer with a <code>"paint.night"</code> property would have those properties applied
         when the map has the <code>"night"</code> class set.
       </p>
+      <p class='space-bottom4 quiet small'>Key:
+        <a class='icon smooth-ramp quiet micro space-right inline' href='#function' title='Supports interpolated functions'>supports interpolated functions</a>
+        <a class='icon step-ramp quiet micro space-right inline' href='#function' title='Supports piecewise constant functions'>supports piecewise constant functions</a>
+        <span class='icon opacity quiet micro space-right inline' title='Transitionable'>transitionable</span>
+      </p>
 
       <div class='space-bottom4 fill-white keyline-all'>
         <% _(layer_types).each(function(t) { %>
@@ -467,14 +669,14 @@ navigation:
     <div class='pad2 prose'>
       <a id='types' class='anchor'></a>
       <h2><a href='#types' title='link to types'>Types</a></h2>
-      <p>Below is a list of types and an explanation of any expression that can be applied to properties in Mapbox GL.</p>
+      <p>A Mapbox style contains values of various types, most commonly as values for the style properties of a layer.</p>
 
       <div class='keyline-all fill-white'>
         <div class='pad2 keyline-bottom'>
           <a id='types-color' class='anchor'></a>
           <h3 class='space-bottom1'><a href='#types-color' title='link to color'>Color</a></h3>
           <p>
-            Mapbox GL accepts a variety of syntaxes for colors - HTML-style hex values, rgb, rgba, hsl, and hsla. It also supports the predefined HTML colors names, like <code>yellow</code> and <code>blue</code>.
+            Colors are written as JSON strings in a variety of permitted formats: HTML-style hex values, rgb, rgba, hsl, and hsla. Predefined HTML colors names, like <code>yellow</code> and <code>blue</code>, are also permitted.
           </p>
 {% highlight json %}
 {
@@ -494,7 +696,7 @@ navigation:
         <div class='pad2 keyline-bottom'>
           <a id='types-enum' class='anchor'></a>
           <h3 class='space-bottom1'><a href='#types-enum' title='link to enum'>Enum</a></h3>
-          <p class='small'>One of a fixed list of string values. Use quotes around values.</p>
+          <p>One of a fixed list of string values. Use quotes around values.</p>
 {% highlight json %}
 {
   "text-transform": "uppercase"
@@ -505,7 +707,7 @@ navigation:
         <div class='pad2 keyline-bottom'>
           <a id='types-string' class='anchor'></a>
           <h3 class='space-bottom1'><a href='#types-string' title='link to string'>String</a></h3>
-          <p>A string is basically just text. In the case of Mapbox GL, you're going to put it in quotes. Strings can be anything, though pay attention to the case of <code>text-field</code> - it actually will refer to features, which you refer to by putting them in curly braces, as seen in the example below.</p>
+          <p>A string is basically just text. In Mapbox styles, you're going to put it in quotes. Strings can be anything, though pay attention to the case of <code>text-field</code> - it actually will refer to features, which you refer to by putting them in curly braces, as seen in the example below.</p>
 {% highlight json %}
 {
   "text-field": "{MY_FIELD}"
@@ -550,48 +752,153 @@ navigation:
         <div class='pad2 keyline-bottom'>
           <a id='types-function' class='anchor'></a>
           <h3 class='space-bottom1'><a href='#types-function' title='link to function'>Function</a></h3>
-          <p>The value for any layout or paint property may be specified as a <em>function</em>, allowing you to
-              parameterize the value according to the current zoom level. Functions are written as an array of stops,
-              where each stop is an array with two elements: a zoom level and a corresponding value. Stops must be in
-              ascending zoom order.
-          </p>
-          <p>
-            <span class='icon smooth-ramp quiet micro space-right inline' title='interpolated'></span>
-            Some properties support <em>interpolated functions</em>. The result of an interpolated function is an
-            interpolated value between the last stop whose zoom level is less than or equal to the current zoom level,
-            and the next stop. By default, linear interpolation is used, but you can use a different exponential base
-            for the interpolation curve via the <code>base</code> property. If the current zoom is less than the first
-            stop or greater than the last stop, the result is the value from the first or last stop respectively.
-          </p>
-          <p>
-            <span class='icon step-ramp quiet micro space-right inline' title='piecewise constant'></span>
-            All other properties support <em>piecewise constant</em> functions. The result of a piecewise constant
-            function is the value of the last stop whose zoom value is less than or equal to the current zoom level.
-          </p>
-          <div class='col12 clearfix'>
-            <div class='col6'>
-{% highlight json %}
-{
-    "line-width": {
-        "base": 1.5,
-        "stops": [[5, 1], [7, 2], [11, 3]]
-    }
-}
-{% endhighlight %}
+
+          <p>The value for any layout or paint property may be specified as a <em>function</em>. Functions allow you to make the appearance of a map feature change with the current zoom level and/or the feature's properties.</p>
+
+          <div class='col12 pad1x'>
+            <div class="col12 clearfix pad0y pad2x space-bottom2">
+              <div><span class='code'><a id="function-stops" href="#function-stops">stops</a></span></div>
+              <div><em class='quiet'>Required (except for <var>identity</var> functions) <a href='#types-array'>array</a>.</em></div>
+              <div>Functions are defined in terms of input and output values. A set of one input value and one output value is known as a "stop."</div>
             </div>
-            <div class='col6 pad1x'>
-              <ul class='space-bottom2 small'>
-                <li class='pad0y'>
-                  <div><span class='code'>base</span><span class='pad1x quiet'>Optional <a href='#number'>number</a>. Default is <%= ref.function.base.default %>.</span></div>
-                  <div class='pad1x'>The exponential base of the interpolation curve. It controls the rate at which the result increases. Higher values make the result increase more towards the high end of the range. With values close to 1 the result increases linearly.</div>
-                </li>
-                <li class='pad0y'>
-                  <div><span class='code'>stops</span><span class='pad1x quiet'>Required <a href='#array'>array</a>.</span></div>
-                  <div class='pad1x'>An array of zoom level and value pairs. The value can be a number or a color value for color properties.</div>
-                </li>
-              </ul>
+            <div class="col12 clearfix pad0y pad2x space-bottom2">
+              <div><span class='code'><a id="function-property" href="#function-property">property</a></span></div>
+              <div><em class='quiet'>Optional <a href='#types-string'>string</a>.</em></div>
+              <div>If specified, the function will take the specified feature property as an input. See <a href="#types-function-zoom-property">Zoom Functions and Property Functions</a> for more information.</div>
+            </div>
+            <div class="col12 clearfix pad0y pad2x space-bottom2">
+              <div><span class='code'><a id="function-base" href="#function-base">base</a></span></div>
+              <div><em class='quiet'>Optional <a href='#types-number'>number</a>. Default is <%= ref.function.base.default %>.</em></div>
+              <div>The exponential base of the interpolation curve. It controls the rate at which the function output increases. Higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.</div>
+            </div>
+            <div class="col12 clearfix pad0y pad2x space-bottom2">
+              <div><span class='code'><a id="function-type" href="#function-type">type</a></span></div>
+              <div><em class='quiet'>Optional <a href='#types-string'>enum</a>. One of <var>identity</var>, <var>exponential</var>, <var>interval</var>, <var>categorical</var>.</em></div>
+              <dl>
+                <dt><var>identity</var></dt>
+                <dd>functions return their input as their output.</dd>
+                <dt><var>exponential</var></dt>
+                <dd>functions generate an output by interpolating between stops just less than and just greater than the function input. This is the default for numeric domain, <span class='icon smooth-ramp quiet micro space-right indivne' title='continuous'></span> range functions.</dd>
+                <dt><var>interval</var></dt>
+                <dd>functions return the output value of the stop just less than the function input. This is the default for numeric domain, <span class='icon step-ramp quiet micro space-right indivne' title='discrete'></span> range functions.</dd>
+                <dt><var>categorical</var></dt>
+                <dd>functions return the output value of the stop equal to the function input. This is the default for string domain functions.</dd>
+              </dl>
+            </div>
+            <div class="col12 clearfix pad0y pad2x space-bottom2">
+              <div><span class='code'><a id="function-colorSpace" href="#function-colorSpace">colorSpace</a></span></div>
+              <div><em class='quiet'>Optional <a href='#types-string'>enum</a>. One of <var>rgb</var>, <var>lab</var>, <var>hcl</var>.</em></div>
+              <div class=' space-bottom1'>The color space in which colors interpolated. Interpolating colors in perceptual color spaces like LAB and HCL tend to produce color ramps that look more consistent and produce colors that can be differentiated more easily than those interpolated in RGB space.</div>
+              <dl class="space-bottom">
+                <dt><var>rgb</var></dt>
+                <dd>Use the RGB color space to interpolate color values</dd>
+                <dt><var>lab</var></dt>
+                <dd>Use the LAB color space to interpolate color values.</dd>
+                <dt><var>hcl</var></dt>
+                <dd>Use the HCL color space to interpolate color values, interpolating the Hue, Chroma, and Luminance channels individually.</dd>
+              </dl>
             </div>
           </div>
+
+          <table class="micro space-bottom">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 2.0.1</td>
+            </tr>
+            <tr>
+              <td><code>identity</code> type</td>
+              <td class='center'>&gt;= 0.26.0</td>
+              <td class='center'>Not yet supported</td>
+              <td class='center'>Not yet supported</td>
+            </tr>
+            <tr>
+              <td><code>colorSpace</code></td>
+              <td class='center'>&gt;= 0.26.0</td>
+              <td class='center'>Not yet supported</td>
+              <td class='center'>Not yet supported</td>
+            </tr>
+            </tbody>
+          </table>
+
+          <p><strong>Zoom functions</strong> allow the appearance of a map feature to change with map’s zoom. Zoom functions can be used to create the illusion of depth and control data density. Each stop is an array with two elements, the first is a zoom and the second is a function output value.</p>
+
+          <div class='col12 space-bottom'>
+              {% highlight js %}
+{
+  "circle-radius": {
+    "stops": [
+
+      // zoom is 5 -> circle radius will be 1px
+      [5, 1],
+
+      // zoom is 10 -> circle radius will be 2px
+      [10, 2]
+
+    ]
+  }
+}
+              {% endhighlight %}
+          </div>
+
+          <p><strong>Property functions</strong> allow the appearance of a map feature to change with its properties. Property functions can be used to visually differentate types of features within the same layer or create data visualizations. Each stop is an array with two elements, the first is a property input value and the second is a function output value. Note that support for property functions is not available across all properties and platforms at this time.</p>
+
+          <div class='col12 space-bottom'>
+              {% highlight js %}
+{
+  "circle-color": {
+    "property": "temperature",
+    "stops": [
+
+      // "temperature" is 0   -> circle color will be blue
+      [0, 'blue'],
+
+      // "temperature" is 100 -> circle color will be red
+      [100, 'red']
+
+    ]
+  }
+}
+              {% endhighlight %}
+          </div>
+
+          <p><strong>Zoom-and-property functions</strong> allow the appearance of a map feature to change with both its properties <em>and</em> zoom. Each stop is an array with two elements, the first is an object with a property input value and a zoom, and the second is a function output value. Note that support for property functions is not yet complete.</p>
+
+          <div class='col12 space-bottom'>
+              {% highlight js %}
+{
+  "circle-radius": {
+    "property": "rating",
+    "stops": [
+
+      // zoom is 0 and "rating" is 0 -> circle radius will be 0px
+      [{zoom: 0, value: 0}, 0],
+
+      // zoom is 0 and "rating" is 5 -> circle radius will be 5px
+      [{zoom: 0, value: 5}, 5],
+
+      // zoom is 20 and "rating" is 0 -> circle radius will be 0px
+      [{zoom: 20, value: 0}, 0],
+
+      // zoom is 20 and "rating" is 5 -> circle radius will be 20px
+      [{zoom: 20, value: 5}, 20]
+
+    ]
+  }
+}
+              {% endhighlight %}
+          </div>
+
         </div>
 
         <div class='pad2'>
@@ -717,6 +1024,31 @@ navigation:
 ]
 {% endhighlight %}
           </div>
+
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>Android SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 2.0.1</td>
+            </tr>
+            <tr>
+              <td><code>has</code>/<code>!has</code></td>
+              <td class='center'>&gt;= 0.19.0</td>
+              <td class='center'>&gt;= 3.3.0</td>
+              <td class='center'>&gt;= 4.1.0</td>
+            </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 

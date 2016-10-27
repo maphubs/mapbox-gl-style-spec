@@ -1,5 +1,33 @@
 ## master
 
+## 8.9.0
+
+v8.0.0 styles are fully compatible with v8.9.0.
+
+* Added identity functions
+* Added `auto` value which represents the calculated default value
+
+## 8.8.1
+
+v8.0.0 styles are fully compatible with v8.8.1.
+
+* Fixed style validation for layers with invalid types
+
+## 8.8.0
+
+v8.0.0 styles are fully compatible with v8.8.0.
+
+* Clarified documentation around fill-opacity.
+* Update function documentation and validation for property functions.
+* Add text-pitch-alignment property.
+* Add icon-text-fit, icon-text-fit-padding properties.
+
+## 8.7.0
+
+v8.0.0 styles are fully compatible with v8.7.0.
+
+* Add support for has / !has operators.
+
 ## 8.6.0
 
 v8.0.0 styles are fully compatible with v8.6.0.

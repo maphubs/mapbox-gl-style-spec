@@ -81,13 +81,24 @@
       "type": "invalid",
       "source": "vector",
       "source-layer": "source-layer",
-      "layout": {},
-      "paint": {}
+      "layout": {
+        "invalid-size": 42
+      },
+      "paint": {
+        "invalid-color": "red"
+      }
     },
     {
       "id": "missing-source-layer",
       "type": "line",
       "source": "vector"
+    },
+    {
+      "id": "interactive-layer",
+      "type": "line",
+      "source": "vector",
+      "source-layer": "source-layer",
+      "interactive": true
     }
   ]
 }

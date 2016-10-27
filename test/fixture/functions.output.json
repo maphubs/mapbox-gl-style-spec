@@ -74,5 +74,13 @@
   {
     "message": "layers[17].paint.fill-antialias.stops[0][0]: number expected, string found",
     "line": 238
+  },
+  {
+    "message": "layers[19].paint.background-color: property functions not supported",
+    "line": 260
+  },
+  {
+    "message": "layers[21].paint.background-color.stops: identity function may not have a \"stops\" property",
+    "line": 284
   }
 ]
