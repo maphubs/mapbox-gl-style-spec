@@ -65,7 +65,7 @@
     },
     "sprite": {
       "type": "string",
-      "doc": "A base URL for retrieving the sprite image and metadata. The extensions `.png`, `.json` and scale factor `@2x.png` will be automatically appended. This property is required if any layer uses the `background-pattern`, `fill-pattern`, `line-pattern`, or `icon-image` properties.",
+      "doc": "A base URL for retrieving the sprite image and metadata. The extensions `.png`, `.json` and scale factor `@2x.png` will be automatically appended. This property is required if any layer uses the `background-pattern`, `fill-pattern`, `line-pattern`, `fill-extrusion-pattern`, or `icon-image` properties.",
       "example": "mapbox://sprites/mapbox/bright-v8"
     },
     "glyphs": {
@@ -286,6 +286,9 @@
         "circle": {
             "doc": "A filled circle."
         },
+        "fill-extrusion": {
+            "doc": "An extruded (3D) polygon."
+        },
         "raster": {
             "doc": "Raster map textures such as satellite imagery."
         },
@@ -347,6 +350,7 @@
     "layout_fill",
     "layout_line",
     "layout_circle",
+    "layout_fill-extrusion",
     "layout_symbol",
     "layout_raster",
     "layout_arcgisraster",
@@ -420,6 +424,28 @@
           "js": "0.10.0",
           "ios": "2.0.0",
           "android": "2.0.1"
+        }
+      }
+    }
+  },
+  "layout_fill-extrusion": {
+    "visibility": {
+      "type": "enum",
+      "function": "piecewise-constant",
+      "zoom-function": true,
+      "values": {
+        "visible": {
+            "doc": "The layer is shown."
+        },
+        "none": {
+            "doc": "The layer is not shown."
+        }
+      },
+      "default": "visible",
+      "doc": "Whether this layer is displayed.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.27.0"
         }
       }
     }
@@ -1563,6 +1589,7 @@
     "paint_fill",
     "paint_line",
     "paint_circle",
+    "paint_fill-extrusion",
     "paint_symbol",
     "paint_raster",
     "paint_arcgisraster",
@@ -1592,7 +1619,7 @@
       "default": 1,
       "minimum": 0,
       "maximum": 1,
-      "doc": "The opacity of the entire fill layer. In contrast to the `fill-color`, this value will also affect the 1px stroke around the fill, if the stroke is used. If a fill layer is extruded, opacity will be per-layer rather than per-feature (and will thus not support property functions).",
+      "doc": "The opacity of the entire fill layer. In contrast to the `fill-color`, this value will also affect the 1px stroke around the fill, if the stroke is used.",
       "transition": true,
       "sdk-support": {
         "basic functionality": {
@@ -1717,39 +1744,144 @@
           "android": "2.0.1"
         }
       }
-    },
-    "fill-extrude-height": {
+    }
+  },
+  "paint_fill-extrusion": {
+    "fill-extrusion-opacity": {
       "type": "number",
       "function": "interpolated",
       "zoom-function": true,
-      "property-function": true,
-      "default": 0,
+      "property-function": false,
+      "default": 1,
       "minimum": 0,
-      "doc": "The height with which to extrude this fill layer.",
+      "maximum": 1,
+      "doc": "The opacity of the entire fill extrusion layer. This is rendered on a per-layer, not per-feature, basis.",
       "transition": true,
       "sdk-support": {
         "basic functionality": {
-          "js": "0.26.0"
+          "js": "0.27.0"
         }
       }
     },
-    "fill-extrude-base": {
-      "type": "number",
+    "fill-extrusion-color": {
+      "type": "color",
+      "default": "#000000",
+      "doc": "The base color of the extruded fill. The extrusion's surfaces will be shaded differently based on this color in combination with the root `light` settings. If this color is specified as `rgba` with an alpha component, the alpha component will be ignored; use `fill-extrusion-opacity` to set layer opacity.",
       "function": "interpolated",
       "zoom-function": true,
       "property-function": true,
-      "default": 0,
-      "minimum": 0,
-      "doc": "The height with which to extrude the base of this layer.",
       "transition": true,
       "requires": [
         {
-          "<=": "fill-extrude-height"
+          "!": "fill-pattern"
         }
       ],
       "sdk-support": {
         "basic functionality": {
-          "js": "0.26.0"
+          "js": "0.27.0"
+        },
+        "data-driven styling": {
+          "js": "0.27.0"
+        }
+      }
+    },
+    "fill-extrusion-translate": {
+      "type": "array",
+      "value": "number",
+      "length": 2,
+      "default": [
+        0,
+        0
+      ],
+      "function": "interpolated",
+      "zoom-function": true,
+      "property-function": false,
+      "transition": true,
+      "units": "pixels",
+      "doc": "The geometry's offset. Values are [x, y] where negatives indicate left and up (on the flat plane), respectively.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.27.0"
+        }
+      }
+    },
+    "fill-extrusion-translate-anchor": {
+      "type": "enum",
+      "function": "piecewise-constant",
+      "zoom-function": true,
+      "property-function": false,
+      "values": {
+        "map": {
+            "doc": "The fill extrusion is translated relative to the map."
+        },
+        "viewport": {
+            "doc": "The fill extrusion is translated relative to the viewport."
+        }
+      },
+      "doc": "Controls the translation reference point.",
+      "default": "map",
+      "requires": [
+        "fill-extrusion-translate"
+      ],
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.27.0"
+        }
+      }
+    },
+    "fill-extrusion-pattern": {
+      "type": "string",
+      "function": "piecewise-constant",
+      "zoom-function": true,
+      "property-function": false,
+      "transition": true,
+      "doc": "Name of image in sprite to use for drawing images on extruded fills. For seamless patterns, image width and height must be a factor of two (2, 4, 8, ..., 512).",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.27.0"
+        }
+      }
+    },
+    "fill-extrusion-height": {
+      "type": "number",
+      "function": "interpolated",
+      "zoom-function": true,
+      "property-function": true,
+      "default": 0,
+      "minimum": 0,
+      "units": "meters",
+      "doc": "The height with which to extrude this layer.",
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.27.0"
+        },
+        "data-driven styling": {
+          "js": "0.27.0"
+        }
+      }
+    },
+    "fill-extrusion-base": {
+      "type": "number",
+      "function": "interpolated",
+      "zoom-function": true,
+      "property-function": true,
+      "default": 0,
+      "minimum": 0,
+      "units": "meters",
+      "doc": "The height with which to extrude the base of this layer.",
+      "transition": true,
+      "requires": [
+        {
+          "<=": "fill-extrusion-height"
+        }
+      ],
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.27.0"
+        },
+        "data-driven styling": {
+          "js": "0.27.0"
         }
       }
     }
@@ -2540,34 +2672,66 @@
       "minimum": 0,
       "maximum": 1,
       "function": "interpolated",
-      "transition": true
+      "zoom-function": true,
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     },
     "raster-hue-rotate": {
       "type": "number",
       "default": 0,
       "period": 360,
       "function": "interpolated",
+      "zoom-function": true,
       "transition": true,
       "units": "degrees",
-      "doc": "Rotates hues around the color wheel."
+      "doc": "Rotates hues around the color wheel.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     },
     "raster-brightness-min": {
       "type": "number",
       "function": "interpolated",
+      "zoom-function": true,
       "doc": "Increase or reduce the brightness of the image. The value is the minimum brightness.",
       "default": 0,
       "minimum": 0,
       "maximum": 1,
-      "transition": true
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     },
     "raster-brightness-max": {
       "type": "number",
       "function": "interpolated",
+      "zoom-function": true,
       "doc": "Increase or reduce the brightness of the image. The value is the maximum brightness.",
       "default": 1,
       "minimum": 0,
       "maximum": 1,
-      "transition": true
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     },
     "raster-saturation": {
       "type": "number",
@@ -2576,7 +2740,15 @@
       "minimum": -1,
       "maximum": 1,
       "function": "interpolated",
-      "transition": true
+      "zoom-function": true,
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     },
     "raster-contrast": {
       "type": "number",
@@ -2585,16 +2757,32 @@
       "minimum": -1,
       "maximum": 1,
       "function": "interpolated",
-      "transition": true
+      "zoom-function": true,
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     },
     "raster-fade-duration": {
       "type": "number",
       "default": 300,
       "minimum": 0,
       "function": "interpolated",
+      "zoom-function": true,
       "transition": true,
       "units": "milliseconds",
-      "doc": "Fade duration when a new tile is added."
+      "doc": "Fade duration when a new tile is added.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "0.10.0",
+          "ios": "2.0.0",
+          "android": "2.0.1"
+        }
+      }
     }
   },
   "paint_background": {
