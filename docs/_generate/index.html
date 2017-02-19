@@ -34,6 +34,7 @@ navigation:
     - title: GeoJSON
     - title: Image
     - title: Video
+    - title: Canvas
   - title: Sprite
   - title: Glyphs
   - title: Transition
@@ -105,10 +106,11 @@ navigation:
       <p>The intended audience of this specification includes:
       <ul>
       <li>Advanced designers and cartographers who want to write styles by hand rather than use <a href='https://www.mapbox.com/studio'>Mapbox Studio</a></li>
-      <li>Developers using style-related features of <a href='https://www.mapbox.com/mapbox-gl-js/'>Mapbox GL JS</a> or the Mapbox <a href='https://www.mapbox.com/ios-sdk/'>iOS</a> or <a href='https://www.mapbox.com/android-sdk/'>Android</a> SDKs</li>
+      <li>Developers using style-related features of <a href='https://www.mapbox.com/mapbox-gl-js/'>Mapbox GL JS</a> or the <a href='https://www.mapbox.com/android-sdk/'>Mapbox Android SDK</a></li>
       <li>Authors of software that generates or processes Mapbox styles.</li>
       </ul>
       </p>
+      <p>Developers using the <a href='https://www.mapbox.com/ios-sdk/'>Mapbox iOS SDK</a> or <a href='https://github.com/mapbox/mapbox-gl-native/tree/master/platform/macos/'>Mapbox macOS SDK</a> should consult the iOS SDK API reference for platform-appropriate documentation of style-related features.</p>
     </div>
 
     <div class='prose'>
@@ -156,7 +158,7 @@ navigation:
     </div>
 
 
-    <% var source_types = ['vector', 'raster', 'geojson', 'image', 'video']; %>
+    <% var source_types = ['vector', 'raster', 'geojson', 'image', 'video', 'canvas']; %>
 
     <div class='pad2 prose'>
       <a id='sources' class='anchor'></a>
@@ -208,7 +210,6 @@ navigation:
           EPSG:3857 (or EPSG:900913) as a source of tiled data.
           The server url should contain a <code>"{bbox-epsg-3857}"</code>
           replacement token to supply the <code>bbox</code> parameter.
-          <em>(This feature is currently supported only in Mapbox GL JS and Mapbox macOS SDK.)</em>
 {% highlight json%}
 "wms-imagery": {
   "type": "raster",
@@ -254,16 +255,18 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Support</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
             <tr>
               <td>basic functionality</td>
               <td class='center'>&gt;= 0.10.0</td>
-              <td class='center'>&gt;= 2.0.0</td>
               <td class='center'>&gt;= 2.0.1</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 0.1.0</td>
             </tr>
             </tbody>
           </table>
@@ -294,16 +297,18 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Support</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
             <tr>
               <td>basic functionality</td>
               <td class='center'>&gt;= 0.10.0</td>
-              <td class='center'>&gt;= 2.0.0</td>
               <td class='center'>&gt;= 2.0.1</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 0.1.0</td>
             </tr>
             </tbody>
           </table>
@@ -356,21 +361,25 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Requirements</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
             <tr>
               <td>basic functionality</td>
               <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'>&gt;= 2.0.1</td>
               <td class='center'>&gt;= 2.0.0</td>
-              <td class='center'>&gt;= 2.0.1</td></tr>
+              <td class='center'>&gt;= 0.1.0</td>
+            </tr>
             <tr>
               <td>clustering</td>
               <td class='center'>&gt;= 0.14.0</td>
-              <td class='center'>Not yet supported</td>
-              <td class='center'>Not yet supported</td>
+              <td class='center'>&gt;= 4.2.0</td>
+              <td class='center'>&gt;= 3.4.0</td>
+              <td class='center'>&gt;= 0.3.0</td>
             </tr>
             </tbody>
           </table>
@@ -409,14 +418,16 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Support</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
             <tr>
               <td>basic functionality</td>
               <td class='center'>&gt;= 0.10.0</td>
+              <td class='center'><a href="https://github.com/mapbox/mapbox-gl-native/issues/1350">Not yet supported</a></td>
               <td class='center'><a href="https://github.com/mapbox/mapbox-gl-native/issues/1350">Not yet supported</a></td>
               <td class='center'><a href="https://github.com/mapbox/mapbox-gl-native/issues/1350">Not yet supported</a></td>
             </tr>
@@ -462,8 +473,9 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Support</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
@@ -472,6 +484,68 @@ navigation:
               <td>&gt;= 0.10.0</td>
               <td><a href="https://github.com/mapbox/mapbox-gl-native/issues/601">Not yet supported</a></td>
               <td><a href="https://github.com/mapbox/mapbox-gl-native/issues/601">Not yet supported</a></td>
+              <td><a href="https://github.com/mapbox/mapbox-gl-native/issues/601">Not yet supported</a></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id='sources-canvas' class='pad2 keyline-bottom'>
+          <h3 class='space-bottom1'><a href='#sources-canvas' title='link to canvas'>canvas</a></h3>
+          <p>
+            A canvas source. The <code>"canvas"</code> value is the ID of the canvas element in the document.
+          </p>
+          <p>
+            The <code>"coordinates"</code> array contains <code>[longitude, latitude]</code> pairs for the video
+            corners listed in clockwise order: top left, top right, bottom right, bottom left.
+          </p>
+          <p>
+            If an HTML document contains a canvas such as this:
+          </p>
+          <div class='space-bottom1 clearfix'>
+{% highlight html%}
+<canvas id="mycanvas" width="400" height="300" style="display: none;"></canvas>
+{% endhighlight %}
+          </div>
+          <p>
+            the corresponding canvas source would be specified as follows:
+          </p>
+          <div>
+{% highlight json %}
+"canvas": {
+  "type": "canvas",
+  "canvas": "mycanvas",
+  "coordinates": [
+     [-122.51596391201019, 37.56238816766053],
+     [-122.51467645168304, 37.56410183312965],
+     [-122.51309394836426, 37.563391708549425],
+     [-122.51423120498657, 37.56161849366671]
+  ]
+}
+{% endhighlight %}
+          </div>
+          <div class='space-bottom1 clearfix'>
+            <% _(ref.source_canvas).each(function(prop, name) { %>
+              <%  if (name === '*' || name === 'type') return %>
+              <%= item({prop: prop, id: "sources-canvas-" + name, name: name}) %>
+            <% }); %>
+          </div>
+          <table class="micro">
+            <thead>
+            <tr class='fill-light'>
+              <th>SDK Support</th>
+              <td class='center'>Mapbox GL JS</td>
+              <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>basic functionality</td>
+              <td>&gt;= 0.32.0</td>
+              <td>Not supported</td>
+              <td>Not supported</td>
+              <td>Not supported</td>
             </tr>
             </tbody>
           </table>
@@ -628,9 +702,6 @@ navigation:
       <p>
         <em>Paint properties</em> are applied later in the rendering process. A layer that shares layout properties with another
         layer can have independent paint properties. Paint properties appear in the layer's <code>"paint"</code> object.
-        Layers can also have class-specific paint properties, which are applied only when the map has a certain class
-        name set. For example, a layer with a <code>"paint.night"</code> property would have those properties applied
-        when the map has the <code>"night"</code> class set.
       </p>
       <p class='space-bottom4 quiet small'>Key:
         <a class='icon smooth-ramp quiet micro space-right inline' href='#function' title='Supports interpolated functions'>supports interpolated functions</a>
@@ -779,9 +850,9 @@ navigation:
                 <dt><var>identity</var></dt>
                 <dd>functions return their input as their output.</dd>
                 <dt><var>exponential</var></dt>
-                <dd>functions generate an output by interpolating between stops just less than and just greater than the function input. This is the default for numeric domain, <span class='icon smooth-ramp quiet micro space-right indivne' title='continuous'></span> range functions.</dd>
+                <dd>functions generate an output by interpolating between stops just less than and just greater than the function input. The domain must be numeric. This is the default for numeric domain, <span class='icon smooth-ramp quiet micro space-right indivne' title='continuous'></span> range functions.</dd>
                 <dt><var>interval</var></dt>
-                <dd>functions return the output value of the stop just less than the function input. This is the default for numeric domain, <span class='icon step-ramp quiet micro space-right indivne' title='discrete'></span> range functions.</dd>
+                <dd>functions return the output value of the stop just less than the function input. The domain must be numeric. This is the default for numeric domain, <span class='icon step-ramp quiet micro space-right indivne' title='discrete'></span> range functions.</dd>
                 <dt><var>categorical</var></dt>
                 <dd>functions return the output value of the stop equal to the function input. This is the default for string domain functions.</dd>
               </dl>
@@ -806,20 +877,23 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Support</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
             <tr>
               <td>basic functionality</td>
               <td class='center'>&gt;= 0.10.0</td>
-              <td class='center'>&gt;= 2.0.0</td>
               <td class='center'>&gt;= 2.0.1</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 0.1.0</td>
             </tr>
             <tr>
               <td><code>identity</code> type</td>
               <td class='center'>&gt;= 0.26.0</td>
+              <td class='center'>Not yet supported</td>
               <td class='center'>Not yet supported</td>
               <td class='center'>Not yet supported</td>
             </tr>
@@ -828,11 +902,12 @@ navigation:
               <td class='center'>&gt;= 0.26.0</td>
               <td class='center'>Not yet supported</td>
               <td class='center'>Not yet supported</td>
+              <td class='center'>Not yet supported</td>
             </tr>
             </tbody>
           </table>
 
-          <p><strong>Zoom functions</strong> allow the appearance of a map feature to change with map’s zoom. Zoom functions can be used to create the illusion of depth and control data density. Each stop is an array with two elements, the first is a zoom and the second is a function output value.</p>
+          <p><strong>Zoom functions</strong> allow the appearance of a map feature to change with map’s zoom level. Zoom functions can be used to create the illusion of depth and control data density. Each stop is an array with two elements: the first is a zoom level and the second is a function output value.</p>
 
           <div class='col12 space-bottom'>
               {% highlight js %}
@@ -851,6 +926,10 @@ navigation:
 }
               {% endhighlight %}
           </div>
+
+          <p>The rendered values of <a href='#types-color'>color</a>, <a href='#types-number'>number</a>, and <a href='#types-array'>array</a> properties are intepolated between stops. <a href='#types-enum'>Enum</a>, <a href='#types-boolean'>boolean</a>, and <a href='#types-string'>string</a> property values cannot be intepolated, so their rendered values only change at the specified stops.</p>
+
+          <p>There is an important difference between the way that zoom functions render for <em>layout</em> and <em>paint</em> properties. Paint properties are continuously re-evaluated whenever the zoom level changes, even fractionally. The rendered value of a paint property will change, for example, as the map moves between zoom levels <code>4.1</code> and <code>4.6</code>. Layout properties, on the other hand, are evaluated only once for each integer zoom level. To continue the prior example: the rendering of a layout property will <em>not</em> change between zoom levels <code>4.1</code> and <code>4.6</code>, no matter what stops are specified; but at zoom level <code>5</code>, the function will be re-evaluated according to the function, and the property's rendered value will change. (You can include fractional zoom levels in a layout property zoom function, and it will affect the generated values; but, still, the rendering will only change at integer zoom levels.)</p>
 
           <p><strong>Property functions</strong> allow the appearance of a map feature to change with its properties. Property functions can be used to visually differentate types of features within the same layer or create data visualizations. Each stop is an array with two elements, the first is a property input value and the second is a function output value. Note that support for property functions is not available across all properties and platforms at this time.</p>
 
@@ -1031,22 +1110,25 @@ navigation:
             <tr class='fill-light'>
               <th>SDK Support</th>
               <td class='center'>Mapbox GL JS</td>
-              <td class='center'>iOS SDK</td>
               <td class='center'>Android SDK</td>
+              <td class='center'>iOS SDK</td>
+              <td class='center'>macOS SDK</td>
             </tr>
             </thead>
             <tbody>
             <tr>
               <td>basic functionality</td>
               <td class='center'>&gt;= 0.10.0</td>
-              <td class='center'>&gt;= 2.0.0</td>
               <td class='center'>&gt;= 2.0.1</td>
+              <td class='center'>&gt;= 2.0.0</td>
+              <td class='center'>&gt;= 0.1.0</td>
             </tr>
             <tr>
               <td><code>has</code>/<code>!has</code></td>
               <td class='center'>&gt;= 0.19.0</td>
-              <td class='center'>&gt;= 3.3.0</td>
               <td class='center'>&gt;= 4.1.0</td>
+              <td class='center'>&gt;= 3.3.0</td>
+              <td class='center'>&gt;= 0.1.0</td>
             </tr>
             </tbody>
           </table>
